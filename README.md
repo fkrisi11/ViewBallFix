@@ -1,6 +1,8 @@
 # View Ball Fix
+Thanks for helping out, [jellejurre](https://github.com/jellejurre)!
 
 #### A tool to calibrate your avatar's viewpoint
+
 This tool helps you with making sure what you see in the editor (outside of play mode) is the exact view point you will get to use, when using your avatar on VRChat.
 <br><br>
 <img src="https://raw.githubusercontent.com/fkrisi11/ViewBallFix/refs/heads/main/Media/preview.png" />
