@@ -5,7 +5,7 @@
   "description": "A tool to calibrate your avatar's viewpoint",
   "url": "https://github.com/fkrisi11/ViewBallFix",
   "vpmDependencies": {
-    "com.vrchat.avatars": "^3.8.0"
+    "com.vrchat.avatars": "^3.x.x"
   },
   "type": "tool",
   "keywords": [
