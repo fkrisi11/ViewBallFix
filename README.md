@@ -23,3 +23,6 @@ Optional steps:
 12. If you are unhappy with the view position for some reason, either use the ``Apply Original Position`` button, or set the viewball back manually in the avatar's descriptor
 
 ### Note: Do NOT calibrate again, while a calibrated position is already set on your avatar, as this will get you bad view position values.
+
+Download the latest release here: [Link](https://github.com/fkrisi11/ViewBallFix/releases/latest)<br>
+Or get it via VCC: [Link](https://fkrisi11.github.io/VPM-Package-Listing/)
