@@ -1,0 +1,18 @@
+{
+    "name": "ViewBallFix.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:15bab59df9a3d624f801a7953435b7b0"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

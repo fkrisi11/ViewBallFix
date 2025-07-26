@@ -1,22 +1,21 @@
 {
-  "name": "dev.sleightly.template",
-  "displayName": "JS-Template",
-  "version": "0.0.0",
-  "description": "A VPM Package Template",
-  "url": "https://github.com/JustSleightly/JS-Template",
+  "name": "com.tohruthedragon.viewballfix",
+  "displayName": "TohruTheDragon - View Ball Fix",
+  "version": "1.0.0",
+  "description": "A tool to calibrate your avatar's viewpoint",
+  "url": "https://github.com/fkrisi11/ViewBallFix",
   "vpmDependencies": {
     "com.vrchat.avatars": "^3.8.0"
   },
   "type": "tool",
   "keywords": [
-    "JustSleightly",
-    "Sleightly",
-    "VRChat",
-    "Template"
+     "TohruTheDragon",
+     "VRChat",
+     "View",
+     "Avatar",
+     "Fix"
   ],
   "author": {
-    "name": "JustSleightly",
-    "email": "just@sleightly.dev",
-    "url": "https://just.sleightly.dev"
+    "name": "TohruTheDragon"
   }
 }
