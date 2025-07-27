@@ -5,6 +5,7 @@ using VRC.SDK3.Avatars.Components;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using UnityEngine.SceneManagement;
 
 [Serializable]
 public class CalibrationData
@@ -34,7 +35,11 @@ public class ViewBallFix : EditorWindow
     private VRCAvatarDescriptor avatarDescriptor;
     private int descriptorInstanceID;
     private GameObject calibrationSphere;
-    private bool isCalibrating = false;
+    private static bool isCalibrating
+    {
+        get => EditorPrefs.GetBool("ViewBallFix_IsCalibrating", false);
+        set => EditorPrefs.SetBool("ViewBallFix_IsCalibrating", value);
+    }
 
     // Current calibration results
     private CalibrationData currentCalibration;
@@ -64,9 +69,7 @@ public class ViewBallFix : EditorWindow
     {
         SceneView.duringSceneGui += OnSceneGUI;
         CalibrationRunner.OnCalibrationComplete += OnCalibrationComplete;
-
-        // Reset calibration state when window opens
-        isCalibrating = false;
+        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
         // Try to restore current avatar's calibration data
         LoadCurrentAvatarData();
@@ -76,15 +79,13 @@ public class ViewBallFix : EditorWindow
     {
         SceneView.duringSceneGui -= OnSceneGUI;
         CalibrationRunner.OnCalibrationComplete -= OnCalibrationComplete;
-
-        // Clean up calibration state
-        isCalibrating = false;
+        EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
     }
 
     void OnSceneGUI(SceneView sceneView)
     {
         // Check if we should show the overlay by looking for calibration sphere
-        bool shouldShowOverlay = EditorApplication.isPlaying && GameObject.Find("CalibrationSphere") != null;
+        bool shouldShowOverlay = EditorApplication.isPlaying && isCalibrating;
 
         if (shouldShowOverlay)
         {
@@ -101,7 +102,7 @@ public class ViewBallFix : EditorWindow
             style.alignment = TextAnchor.MiddleCenter;
 
             // Calculate position (center-top of scene view)
-            Vector2 size = style.CalcSize(new GUIContent("Calibrating view position..."));
+            Vector2 size = style.CalcSize(new GUIContent("Calibrating view position...\nMake sure Game View is visible!"));
             Rect rect = new Rect(
                 (sceneView.position.width - size.x) / 2,
                 50,
@@ -112,7 +113,7 @@ public class ViewBallFix : EditorWindow
             // Draw the text (using a disabled GUI area to prevent interaction)
             bool originalEnabled = GUI.enabled;
             GUI.enabled = false;
-            GUI.Label(rect, "Calibrating view position...", style);
+            GUI.Label(rect, "Calibrating view position...\nMake sure Game View is visible!", style);
             GUI.enabled = originalEnabled;
 
             Handles.EndGUI();
@@ -137,11 +138,11 @@ public class ViewBallFix : EditorWindow
             // Save to JSON
             SaveCalibrationData(currentCalibration);
 
-            Debug.Log("Calibration completed successfully!");
+            Debug.Log("<color=#00FF00>[View Ball Fix]</color> Calibration completed successfully!");
         }
         else
         {
-            Debug.LogError("Failed to save calibration data - avatar information was lost!");
+            Debug.LogError("<color=#00FF00>[View Ball Fix]</color> Failed to save calibration data - avatar information was lost!");
         }
 
         // Ensure cleanup is complete
@@ -168,6 +169,15 @@ public class ViewBallFix : EditorWindow
             case 1:
                 DrawSettingsTab();
                 break;
+        }
+
+        if (isCalibrating && !EditorApplication.isPlaying)
+        {
+            if (GUILayout.Button("Fix broken calibration"))
+            {
+                isCalibrating = false;
+                CleanupExistingCalibration();
+            }
         }
 
         // Auto-refresh when values change
@@ -223,46 +233,7 @@ public class ViewBallFix : EditorWindow
         GUILayout.Space(10);
 
         // Check if calibration is running
-        CalibrationRunner runner = null;
-        bool calibrationActive = false;
-
-        if (EditorApplication.isPlaying)
-        {
-            runner = FindObjectOfType<CalibrationRunner>();
-            calibrationActive = runner != null;
-
-            // Also check for calibration sphere
-            GameObject calibrationSphereInScene = GameObject.Find("CalibrationSphere");
-            if (calibrationSphereInScene != null)
-            {
-                calibrationActive = true;
-            }
-
-            if (calibrationActive && !isCalibrating)
-            {
-                isCalibrating = true;
-                SceneView.RepaintAll();
-            }
-        }
-        else
-        {
-            if (isCalibrating)
-            {
-                isCalibrating = false;
-                SceneView.RepaintAll();
-            }
-        }
-
-        // Also show overlay if we have a calibration sphere in the scene
-        if (EditorApplication.isPlaying && GameObject.Find("CalibrationSphere") != null)
-        {
-            if (!isCalibrating)
-            {
-                isCalibrating = true;
-                SceneView.RepaintAll();
-                Debug.Log("Found calibration sphere, showing overlay");
-            }
-        }
+        bool calibrationActive = isCalibrating;
 
         // Calibration button
         GUI.enabled = !calibrationActive && !EditorApplication.isPlaying;
@@ -418,27 +389,27 @@ public class ViewBallFix : EditorWindow
     {
         if (avatarDescriptor == null)
         {
-            Debug.LogError("No avatar descriptor assigned!");
+            Debug.LogError("<color=#00FF00>[View Ball Fix]</color> No avatar descriptor assigned!");
             return;
         }
 
         Animator animator = avatarDescriptor.GetComponent<Animator>();
         if (animator == null)
         {
-            Debug.LogError("Avatar must have an Animator component!");
+            Debug.LogError("<color=#00FF00>[View Ball Fix]</color> Avatar must have an Animator component!");
             return;
         }
 
         if (!animator.isHuman)
         {
-            Debug.LogError("Avatar must have a humanoid Animator component!");
+            Debug.LogError("<color=#00FF00>[View Ball Fix]</color> Avatar must have a humanoid Animator component!");
             return;
         }
 
         Transform headBone = animator.GetBoneTransform(HumanBodyBones.Head);
         if (headBone == null)
         {
-            Debug.LogError("Could not find head bone in avatar!");
+            Debug.LogError("<color=#00FF00>[View Ball Fix]</color> Could not find head bone in avatar!");
             return;
         }
 
@@ -450,10 +421,12 @@ public class ViewBallFix : EditorWindow
         currentAvatarGuid = GetAvatarGuid(avatarDescriptor);
         currentAvatarName = avatarDescriptor.name;
 
-        Debug.Log("Calibration started");
+        Debug.Log("<color=#00FF00>[View Ball Fix]</color> Calibration started");
 
         // Clean up any existing calibration objects
         CleanupExistingCalibration();
+
+        isCalibrating = true;
 
         // Create calibration sphere directly on the head bone
         calibrationSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -470,53 +443,58 @@ public class ViewBallFix : EditorWindow
         CalibrationRunner runner = calibrationSphere.AddComponent<CalibrationRunner>();
         runner.Initialize(avatarDescriptor);
 
-        // Subscribe to play mode state changes for cleanup
-        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-
         // Enter play mode
         EditorApplication.isPlaying = true;
     }
 
-    void CleanupExistingCalibration()
+    static void CleanupExistingCalibration()
     {
-        // Remove any existing calibration spheres
-        GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-        foreach (GameObject obj in allObjects)
+        // Single pass through all loaded scenes, including inactive objects
+        for (int i = 0; i < SceneManager.sceneCount; i++)
         {
-            if (obj != null && obj.name == "CalibrationSphere")
+            Scene scene = SceneManager.GetSceneAt(i);
+            if (scene.isLoaded)
             {
-                DestroyImmediate(obj);
-            }
-        }
-
-        // Remove any existing calibration runners
-        CalibrationRunner[] existingRunners = Resources.FindObjectsOfTypeAll<CalibrationRunner>();
-        foreach (CalibrationRunner runner in existingRunners)
-        {
-            if (runner != null && runner.gameObject != null)
-            {
-                DestroyImmediate(runner);
+                GameObject[] rootObjects = scene.GetRootGameObjects();
+                foreach (GameObject rootObj in rootObjects)
+                {
+                    // Single recursive search through entire hierarchy (active + inactive)
+                    FindAndDestroyCalibrationObjects(rootObj.transform);
+                }
             }
         }
     }
 
-    void OnPlayModeStateChanged(PlayModeStateChange state)
+    static void FindAndDestroyCalibrationObjects(Transform current)
     {
-        if (state == PlayModeStateChange.ExitingPlayMode)
+        // Check current object
+        if (current.name == "CalibrationSphere")
         {
-            CleanupExistingCalibration();
+            DestroyImmediate(current.gameObject);
+            return; // Don't process children since we're destroying the parent
         }
-        else if (state == PlayModeStateChange.EnteredEditMode)
+
+        // Check for CalibrationRunner component (more specific than name)
+        CalibrationRunner runner = current.GetComponent<CalibrationRunner>();
+        if (runner != null)
         {
-            CleanupExistingCalibration();
+            DestroyImmediate(current.gameObject);
+            return;
+        }
 
-            // Clean up the event subscription
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        // Process all children (includes inactive ones)
+        for (int i = current.childCount - 1; i >= 0; i--)
+        {
+            FindAndDestroyCalibrationObjects(current.GetChild(i));
+        }
+    }
 
-            // Reset UI state
+    static void OnPlayModeStateChanged(PlayModeStateChange state)
+    { 
+        if (state == PlayModeStateChange.ExitingPlayMode || state ==  PlayModeStateChange.EnteredEditMode)
+        {
             isCalibrating = false;
-
-            Repaint();
+            CleanupExistingCalibration();
         }
     }
 
@@ -558,7 +536,7 @@ public class ViewBallFix : EditorWindow
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to save calibration data: {e.Message}");
+            Debug.LogError($"<color=#00FF00>[View Ball Fix]</color> Failed to save calibration data: {e.Message}");
         }
     }
 
@@ -573,7 +551,7 @@ public class ViewBallFix : EditorWindow
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to load calibration database: {e.Message}");
+                Debug.LogError($"<color=#00FF00>[View Ball Fix]</color> Failed to load calibration database: {e.Message}");
             }
         }
 
@@ -610,7 +588,7 @@ public class ViewBallFix : EditorWindow
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to clear calibration data: {e.Message}");
+            Debug.LogError($"<color=#00FF00>[View Ball Fix]</color> Failed to clear calibration data: {e.Message}");
         }
 
         hasCalibrationResults = false;
@@ -633,7 +611,7 @@ public class ViewBallFix : EditorWindow
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to clear all data: {e.Message}");
+            Debug.LogError($"<color=#00FF00>[View Ball Fix]</color> Failed to clear all data: {e.Message}");
         }
     }
 

@@ -15,7 +15,7 @@ Steps to follow for calibration:
 5. Drag your avatar from your hierarchy, into the ``Avatar Descriptor`` field
 6. Make sure you have either Av3 Emulator or Gesture Manager in your scene
 7. Click ``Begin Calibration``
-8. Wait until it finishes, and you are back to Edit mode
+8. Make sure the Game View window is visible while calibrating, then wait until it finishes, and you are back to Edit mode.
 9. Apply the new position by clicking the ``Apply Calibrated Position`` button
 <br><br>
 Optional steps:
@@ -24,7 +24,7 @@ Optional steps:
 <br><br>
 12. If you are unhappy with the view position for some reason, either use the ``Apply Original Position`` button, or set the viewball back manually in the avatar's descriptor
 
-### Note: Do NOT calibrate again, while a calibrated position is already set on your avatar, as this will get you bad view position values.
+### WARNING: Do NOT calibrate again, while a calibrated position is already set on your avatar, as this will get you bad view position values.
 
 Download the latest release here: [Link](https://github.com/fkrisi11/ViewBallFix/releases/latest)<br>
 Or get it via VCC: [Link](https://fkrisi11.github.io/VPM-Package-Listing/)
