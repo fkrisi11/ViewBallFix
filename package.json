@@ -1,7 +1,7 @@
 {
   "name": "com.tohruthedragon.viewballfix",
   "displayName": "TohruTheDragon - View Ball Fix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tool to calibrate your avatar's viewpoint",
   "url": "https://github.com/fkrisi11/ViewBallFix",
   "vpmDependencies": {
@@ -9,11 +9,11 @@
   },
   "type": "tool",
   "keywords": [
-     "TohruTheDragon",
-     "VRChat",
-     "View",
-     "Avatar",
-     "Fix"
+    "TohruTheDragon",
+    "VRChat",
+    "View",
+    "Avatar",
+    "Fix"
   ],
   "author": {
     "name": "TohruTheDragon"
